@@ -1,0 +1,69 @@
+clear ; close all; clc
+
+load ('ex7data1.mat');
+
+figure;
+plot(X(:, 1), X(:, 2), 'ok');
+axis([0.5 6.5 2 8]); axis square;
+% axis([0.5 6.5 2 8]); axis square;
+
+[m, n] = size(X);  % m # of examples, n # of features (variables)
+
+% Zero mean and normalization
+mu = mean(X);
+X_zeromean = X - mu;
+sigma = std(X_zeromean);
+X_norm = X_zeromean./sigma;
+
+% SVD
+Cov_mtx = (1/m).*X_norm'*X_norm;  
+[U,S,V] = svd(Cov_mtx); % Principal components 
+
+% How much of the variance is captured by 
+
+%  Draw the eigenvectors centered at mean of data. These lines show the
+%  directions of maximum variations in the dataset.
+hold on;
+drawLine(mu, mu +  S(1,1) * U(:,1)', '-b', 'LineWidth', 2);
+drawLine(mu, mu +  S(2,2) * U(:,2)', '-r', 'LineWidth', 2);
+legend('Data points', 'Principle Component 1', 'Principle Component 2');
+hold off;
+
+
+figure;
+plot(X_norm(:, 1), X_norm(:, 2), 'bo');
+axis([-2.5 3 -2.5 3]); axis square;
+
+% Project data
+K = 1;
+U_reduced = U(:,1:K);
+Z = X_norm * U_reduced;
+
+% Recover the approximation data back with error. Which means we are
+% visualizing data on the line which spanned by principal components
+U_reduced = U(:,1:K);
+X_rec = Z*U_reduced';
+
+hold on;
+plot(X_rec(:, 1), X_rec(:, 2), 'ro');
+for i = 1:size(X_norm, 1)
+    drawLine(X_norm(i,:), X_rec(i,:), '--k', 'LineWidth', 1);
+end
+
+hold off
+
+% plot the 1D reduced points on PC1
+
+figure;
+scatter(Z, zeros(1, length(Z)), 'ro');
+
+
+
+function drawLine(p1, p2, varargin)
+%DRAWLINE Draws a line from point p1 to point p2
+%   DRAWLINE(p1, p2) Draws a line from point p1 to point p2 and holds the
+%   current figure
+
+plot([p1(1) p2(1)], [p1(2) p2(2)], varargin{:});
+
+end
